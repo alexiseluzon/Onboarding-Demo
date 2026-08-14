@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  firebaseUid String  @unique
+  email      String   @unique
+  createdAt  DateTime @default(now())
+
+  answers    QuizAnswer[]
+  payments   Payment[]
+}
+
+model QuizAnswer {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stepKey   String   // e.g. "goal_selection", "plan_type"
+  value     Json     // flexible: text, single-select, multi-select answers
+  createdAt DateTime @default(now())
+
+  @@unique([userId, stepKey]) // one answer per step per user, upserted
+  @@index([userId])
+}
+
+model Payment {
+  id                    String   @id @default(uuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripePaymentIntentId String   @unique
+  amount                Int      // cents
+  currency               String   @default("usd")
+  status                String   // "pending" | "succeeded" | "failed"
+  createdAt             DateTime @default(now())
+
+  @@index([userId])
+}
