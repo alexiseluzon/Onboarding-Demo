@@ -59,3 +59,48 @@ button:disabled {
   background: #a9b8d6;
   cursor: not-allowed;
 }
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+label {
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+input {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.form-error {
+  color: #c0392b;
+  font-size: 14px;
+  margin: 4px 0 0;
+}
+
+form button[type="submit"] {
+  margin-top: 16px;
+}
+
+.google-btn {
+  width: 100%;
+  margin-top: 12px;
+  background: #fff;
+  color: var(--color-text);
+  border: 1px solid #ccc;
+}
+
+.link-btn {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  background: none;
+  color: var(--color-primary);
+  text-decoration: underline;
+}
