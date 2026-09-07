@@ -156,3 +156,13 @@ form button[type="submit"] {
   color: var(--color-text);
   border: 1px solid #ccc;
 }
+
+.plan-toggle {
+  display: flex;
+  gap: 12px;
+  margin: 16px 0 24px;
+}
+.plan-toggle .option-btn {
+  flex: 1;
+  text-align: center;
+}
