@@ -49,4 +49,31 @@ router.post('/create-intent', requireAuth, async (req, res, next) => {
   }
 });
 
+// Stripe webhook — the source of truth for payment status.
+// Never trust the client-side redirect alone; Stripe confirms server-to-server.
+// Mounted with express.raw() in index.js (signature verification needs the raw body).
+export async function handleStripeWebhook(req, res) {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error('Stripe webhook signature verification failed', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === 'payment_intent.succeeded' || event.type === 'payment_intent.payment_failed') {
+    const intent = event.data.object;
+    const status = event.type === 'payment_intent.succeeded' ? 'succeeded' : 'failed';
+
+    await prisma.payment.updateMany({
+      where: { stripePaymentIntentId: intent.id },
+      data: { status },
+    });
+  }
+
+  res.json({ received: true });
+}
+
 export default router;

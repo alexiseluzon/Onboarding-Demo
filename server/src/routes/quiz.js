@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { prisma } from '../lib/prisma.js';
 import requireAuth from '../middleware/requireAuth.js';
+import { pushContactToHubSpot } from '../lib/hubspot.js';
 
 const router = Router();
+
+const LAST_STEP_KEY = 'plan_type'; // final step in the 9-step flow — triggers HubSpot push
 
 // Ensures a User row exists for the authenticated Firebase user (idempotent)
 async function ensureUser(firebaseUser) {
@@ -40,6 +43,12 @@ router.post('/answers', requireAuth, async (req, res, next) => {
       update: { value },
       create: { userId: user.id, stepKey, value },
     });
+
+    // Fire-and-forget: push to HubSpot once the flow's last step is answered.
+    // Non-blocking and non-fatal — never let a CRM outage break onboarding.
+    if (stepKey === LAST_STEP_KEY) {
+      pushContactToHubSpot({ email: user.email, fullName: req.user.name || '' }).catch(() => {});
+    }
 
     res.status(200).json({ answer });
   } catch (err) {

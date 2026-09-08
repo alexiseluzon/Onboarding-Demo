@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Running server tests..."
+(cd server && npm test) || exit 1
+
+echo "Running client unit tests..."
+(cd client && npm test) || exit 1
