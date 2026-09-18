@@ -49,6 +49,34 @@ router.post('/create-intent', requireAuth, async (req, res, next) => {
   }
 });
 
+// GET /api/payments/status?intent=pi_xxx — source of truth is our DB,
+// updated only by the Stripe webhook, never trusting the client redirect alone.
+router.get('/status', requireAuth, async (req, res, next) => {
+  try {
+    const { intent } = req.query;
+    if (!intent || typeof intent !== 'string') {
+      return res.status(400).json({ error: 'Missing intent query param' });
+    }
+
+    const payment = await prisma.payment.findUnique({
+      where: { stripePaymentIntentId: intent },
+    });
+
+    if (!payment) {
+      return res.status(404).json({ error: 'Payment not found' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { firebaseUid: req.user.uid } });
+    if (!user || payment.userId !== user.id) {
+      return res.status(403).json({ error: 'Not authorized to view this payment' });
+    }
+
+    res.json({ status: payment.status });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Stripe webhook — the source of truth for payment status.
 // Never trust the client-side redirect alone; Stripe confirms server-to-server.
 // Mounted with express.raw() in index.js (signature verification needs the raw body).
