@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import QuizPage from './pages/QuizPage.jsx';
 import PaymentPage from './pages/PaymentPage.jsx';
+import CompletePage from './pages/CompletePage.jsx';
 import './App.css';
 
 export default function App() {
@@ -32,6 +33,14 @@ export default function App() {
               }
             />
             <Route path="/" element={<LoginPage />} />
+            <Route
+              path="/quiz/complete"
+              element={
+                <ProtectedRoute>
+                  <CompletePage />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </main>
       </BrowserRouter>
