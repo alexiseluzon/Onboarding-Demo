@@ -59,6 +59,7 @@ export default function LoginPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
+          placeholder="you@example.com"
           required
         />
 
@@ -70,6 +71,7 @@ export default function LoginPage() {
           onChange={(e) => setPassword(e.target.value)}
           autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
           minLength={6}
+          placeholder={mode === 'signin' ? 'Enter your password' : 'At least 6 characters'}
           required
         />
 
